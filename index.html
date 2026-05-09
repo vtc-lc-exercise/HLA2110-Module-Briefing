@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLA2110 Module Briefing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+HK:wght@400;500;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', 'Noto Sans HK', sans-serif; 
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #0f172a, #312e81);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow: hidden; 
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .bg-shape {
+            position: absolute;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .shape-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #3730a3; }
+        .shape-2 { bottom: -10%; right: -10%; width: 40vw; height: 40vw; background: #1e3a8a; animation-delay: -5s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 5%) scale(1.1); }
+        }
+
+        .slide { display: none; opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .slide.active { display: flex; opacity: 1; animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideIn {
+            from { transform: translateY(30px) scale(0.98); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        
+        .custom-scroll::-webkit-scrollbar { width: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        #lightbox { display: none; backdrop-filter: blur(12px); }
+        #lightbox.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .zoom-container { overflow: auto; max-height: 75vh; display: flex; justify-content: center; align-items: center; }
+        #lightbox-img { transition: transform 0.3s ease; transform-origin: center center; max-width: 100%; object-fit: contain; }
+        
+        .kw { color: #0284c7; font-weight: 700; background: linear-gradient(120deg, #e0f2fe 0%, #bae6fd 100%); padding: 2px 8px; border-radius: 6px; }
+
+        .presentation-panel {
+            background: #ffffff;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        .perspective { perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .my-rotate-y-180 { transform: rotateY(180deg); }
+        
+        .img-overlay { background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, transparent 100%); }
+
+        /* Slide 4 Custom Active Classes */
+        .card-active {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+            transform: scale(1.02);
+            border-color: var(--active-color) !important;
+        }
+        .card-active .icon-box {
+            background-color: var(--active-bg) !important;
+            color: var(--active-color) !important;
+        }
+        .card-active .text-content {
+            opacity: 1 !important;
+            color: #1f2937 !important; /* text-gray-800 */
+        }
+        .card-active .highlight-text {
+            color: var(--active-text-dark) !important;
+        }
+        
+        /* Numbering Hover & Active Effects */
+        .group:hover .card-num {
+            color: var(--active-color);
+            opacity: 0.1;
+        }
+        .card-active .card-num {
+            color: var(--active-color) !important;
+            opacity: 0.15 !important;
+        }
+
+        /* Slide 8 Circle Active Class */
+        .circle-active {
+            border-color: var(--active-color) !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center p-6 relative">
+
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <main class="relative presentation-panel rounded-3xl flex flex-col w-full max-w-[1280px] h-[85vh] overflow-hidden">
+        
+        <div class="h-2 bg-gray-100 w-full absolute top-0 left-0 z-20">
+            <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500" style="width: 0%;"></div>
+        </div>
+
+        <div id="slides-container" class="flex-1 px-10 pb-10 pt-16 overflow-hidden relative z-10">
+            
+            <!-- Slide 1: Title -->
+            <div class="slide flex-row h-full rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-white" id="slide-1">
+                <div class="w-1/2 p-14 flex flex-col justify-center">
+                    <div class="inline-block bg-blue-50 text-blue-600 font-bold px-4 py-2 rounded-full text-sm mb-6 tracking-wide uppercase border border-blue-100 w-max">
+                        HTI, ICI, CCI Certificate Programmes
+                    </div>
+                    <h1 class="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
+                        HLA2110<br>
+                        <span class="text-3xl lg:text-4xl text-gray-500 font-semibold mt-2 block">Vocational English:</span>
+                        <span class="text-blue-600 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Oral Communication<br>(Event Operations)</span>
+                    </h1>
+                    <div class="w-24 h-1.5 bg-blue-500 rounded-full mb-8"></div>
+                    <h3 class="text-2xl lg:text-3xl font-medium text-gray-600 flex items-center gap-4">
+                        <i class="fas fa-chalkboard-teacher text-blue-500"></i> Module Briefing
+                    </h3>
+                </div>
+                <div class="w-1/2 relative">
+                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80" alt="Event" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-l from-transparent to-white"></div>
+                </div>
+            </div>
+
+            <!-- Slide 2: Agenda -->
+            <div class="slide flex-col h-full" id="slide-2">
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-10 flex items-center gap-4"><i class="fas fa-list-ul text-blue-500"></i> Agenda</h2>
+                <div class="grid grid-cols-2 gap-6 h-full pb-8">
+                    <div onclick="goToSlide(3)" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group flex items-center gap-6">
+                        <div class="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">1</div>
+                        <h3 class="text-2xl font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">Module Information</h3>
+                    </div>
+                    <div onclick="goToSlide(5)" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer group flex items-center gap-6">
+                        <div class="w-14 h-14 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold group-hover:bg-indigo-600 group-hover:text-white transition-colors">2</div>
+                        <h3 class="text-2xl font-semibold text-gray-700 group-hover:text-indigo-600 transition-colors">Module Design & TLP</h3>
+                    </div>
+                    <div onclick="goToSlide(10)" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group flex items-center gap-6">
+                        <div class="w-14 h-14 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl font-bold group-hover:bg-purple-600 group-hover:text-white transition-colors">3</div>
+                        <h3 class="text-2xl font-semibold text-gray-700 group-hover:text-purple-600 transition-colors">Assessment Components</h3>
+                    </div>
+                    <div onclick="goToSlide(17)" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-300 transition-all cursor-pointer group flex items-center gap-6">
+                        <div class="w-14 h-14 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-2xl font-bold group-hover:bg-green-600 group-hover:text-white transition-colors">4</div>
+                        <h3 class="text-2xl font-semibold text-gray-700 group-hover:text-green-600 transition-colors">T&L Resources</h3>
+                    </div>
+                    <div onclick="goToSlide(18)" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-300 transition-all cursor-pointer group flex items-center gap-6 col-span-2 w-1/2 mx-auto">
+                        <div class="w-14 h-14 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-2xl font-bold group-hover:bg-orange-600 group-hover:text-white transition-colors">5</div>
+                        <h3 class="text-2xl font-semibold text-gray-700 group-hover:text-orange-600 transition-colors">Q&A</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Module Info -->
+            <div class="slide flex-row gap-10 h-full" id="slide-3">
+                <div class="w-3/5 flex flex-col justify-center pr-4">
+                    <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-8 border-l-8 border-blue-500 pl-6 rounded-sm">Module Information</h2>
+                    <h3 class="text-2xl lg:text-3xl font-semibold text-blue-700 mb-6 flex items-center gap-3"><i class="fas fa-bullhorn"></i> Listening and Speaking Skills</h3>
+                    <div class="text-xl lg:text-2xl leading-relaxed text-gray-700 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <span class="kw">Participate in short oral interactions</span> and <span class="kw">present short spoken texts</span> relating to a specified range of familiar and routine event operations contexts involving <span class="kw">description</span>, <span class="kw">offers</span>, <span class="kw">requests</span> and <span class="kw">invitations</span>, and expressed in simple language, in order to understand and communicate information and ideas effectively.
+                    </div>
+                </div>
+                <div class="w-2/5 flex flex-col gap-6 py-4">
+                    <div class="flex-1 rounded-2xl overflow-hidden relative shadow-md group">
+                        <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Briefing">
+                        <div class="absolute inset-0 img-overlay flex items-end p-6">
+                            <h4 class="text-white text-2xl lg:text-3xl font-bold flex items-center gap-3"><i class="fas fa-users"></i> Briefing</h4>
+                        </div>
+                    </div>
+                    <div class="flex-1 rounded-2xl overflow-hidden relative shadow-md group">
+                        <img src="https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Telephone">
+                        <div class="absolute inset-0 img-overlay flex items-end p-6">
+                            <h4 class="text-white text-2xl lg:text-3xl font-bold flex items-center gap-3"><i class="fas fa-phone-alt"></i> Telephone Conversation</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4: Outcomes (Updated with Numbering & Height) -->
+            <div class="slide flex-col h-full" id="slide-4">
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 border-l-8 border-blue-500 pl-6">Module Intended Learning Outcomes</h2>
+                <p class="text-2xl mt-6 mb-10 text-gray-600 font-medium">Students are expected to be able to, with some assistance:</p>
+                
+                <div class="grid grid-cols-3 gap-6 flex-1 pb-4 items-start">
+                    <!-- Card 1 -->
+                    <div class="bg-white py-6 px-6 h-48 rounded-2xl border-4 border-gray-100 flex flex-col items-center text-center justify-center gap-4 transition-all duration-300 cursor-pointer group hover:border-blue-300 relative overflow-hidden" 
+                         style="--active-color: #3b82f6; --active-bg: #eff6ff; --active-text-dark: #1d4ed8;" 
+                         onclick="this.classList.toggle('card-active')">
+                        <span class="card-num absolute top-3 left-5 text-5xl font-black text-gray-100 opacity-60 transition-all duration-300 z-0 select-none">01</span>
+                        <div class="relative z-10 flex flex-col items-center gap-3">
+                            <div class="icon-box w-12 h-12 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-xl transition-colors group-hover:text-blue-400"><i class="fas fa-info-circle"></i></div>
+                            <p class="text-xl lg:text-2xl text-gray-400 opacity-70 text-content transition-all group-hover:opacity-100"><span class="font-bold highlight-text transition-colors">Give information</span> appropriate to purposes</p>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="bg-white py-6 px-6 h-48 rounded-2xl border-4 border-gray-100 flex flex-col items-center text-center justify-center gap-4 transition-all duration-300 cursor-pointer group hover:border-green-300 relative overflow-hidden" 
+                         style="--active-color: #22c55e; --active-bg: #f0fdf4; --active-text-dark: #15803d;" 
+                         onclick="this.classList.toggle('card-active')">
+                        <span class="card-num absolute top-3 left-5 text-5xl font-black text-gray-100 opacity-60 transition-all duration-300 z-0 select-none">02</span>
+                        <div class="relative z-10 flex flex-col items-center gap-3">
+                            <div class="icon-box w-12 h-12 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-xl transition-colors group-hover:text-green-400"><i class="fas fa-comments"></i></div>
+                            <p class="text-xl lg:text-2xl text-gray-400 opacity-70 text-content transition-all group-hover:opacity-100"><span class="font-bold highlight-text transition-colors">Develop interaction</span> through responses</p>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="bg-white py-6 px-6 h-48 rounded-2xl border-4 border-gray-100 flex flex-col items-center text-center justify-center gap-4 transition-all duration-300 cursor-pointer group hover:border-purple-300 relative overflow-hidden" 
+                         style="--active-color: #a855f7; --active-bg: #faf5ff; --active-text-dark: #7e22ce;" 
+                         onclick="this.classList.toggle('card-active')">
+                        <span class="card-num absolute top-3 left-5 text-5xl font-black text-gray-100 opacity-60 transition-all duration-300 z-0 select-none">03</span>
+                        <div class="relative z-10 flex flex-col items-center gap-3">
+                            <div class="icon-box w-12 h-12 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-xl transition-colors group-hover:text-purple-400"><i class="fas fa-sitemap"></i></div>
+                            <p class="text-xl lg:text-2xl text-gray-400 opacity-70 text-content transition-all group-hover:opacity-100">Use proper <span class="font-bold highlight-text transition-colors">structure and organisation</span></p>
+                        </div>
+                    </div>
+                    <!-- Card 4 -->
+                    <div class="bg-white py-6 px-6 h-48 rounded-2xl border-4 border-gray-100 flex flex-col items-center text-center justify-center gap-4 transition-all duration-300 cursor-pointer group hover:border-orange-300 relative overflow-hidden" 
+                         style="--active-color: #f97316; --active-bg: #fff7ed; --active-text-dark: #c2410c;" 
+                         onclick="this.classList.toggle('card-active')">
+                        <span class="card-num absolute top-3 left-5 text-5xl font-black text-gray-100 opacity-60 transition-all duration-300 z-0 select-none">04</span>
+                        <div class="relative z-10 flex flex-col items-center gap-3">
+                            <div class="icon-box w-12 h-12 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-xl transition-colors group-hover:text-orange-400"><i class="fas fa-user-tie"></i></div>
+                            <p class="text-xl lg:text-2xl text-gray-400 opacity-70 text-content transition-all group-hover:opacity-100">Use appropriate <span class="font-bold highlight-text transition-colors">style and register</span></p>
+                        </div>
+                    </div>
+                    <!-- Card 5 -->
+                    <div class="bg-white py-6 px-6 h-48 rounded-2xl border-4 border-gray-100 flex flex-col items-center text-center justify-center gap-4 transition-all duration-300 cursor-pointer group hover:border-indigo-300 relative overflow-hidden" 
+                         style="--active-color: #6366f1; --active-bg: #eef2ff; --active-text-dark: #4338ca;" 
+                         onclick="this.classList.toggle('card-active')">
+                        <span class="card-num absolute top-3 left-5 text-5xl font-black text-gray-100 opacity-60 transition-all duration-300 z-0 select-none">05</span>
+                        <div class="relative z-10 flex flex-col items-center gap-3">
+                            <div class="icon-box w-12 h-12 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-xl transition-colors group-hover:text-indigo-400"><i class="fas fa-spell-check"></i></div>
+                            <p class="text-xl lg:text-2xl text-gray-400 opacity-70 text-content transition-all group-hover:opacity-100">Use <span class="font-bold highlight-text transition-colors">simple grammar</span> & vocabulary</p>
+                        </div>
+                    </div>
+                    <!-- Card 6 -->
+                    <div class="bg-white py-6 px-6 h-48 rounded-2xl border-4 border-gray-100 flex flex-col items-center text-center justify-center gap-4 transition-all duration-300 cursor-pointer group hover:border-rose-300 relative overflow-hidden" 
+                         style="--active-color: #f43f5e; --active-bg: #fff1f2; --active-text-dark: #be123c;" 
+                         onclick="this.classList.toggle('card-active')">
+                        <span class="card-num absolute top-3 left-5 text-5xl font-black text-gray-100 opacity-60 transition-all duration-300 z-0 select-none">06</span>
+                        <div class="relative z-10 flex flex-col items-center gap-3">
+                            <div class="icon-box w-12 h-12 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-xl transition-colors group-hover:text-rose-400"><i class="fas fa-hands"></i></div>
+                            <p class="text-xl lg:text-2xl text-gray-400 opacity-70 text-content transition-all group-hover:opacity-100">Use appropriate <span class="font-bold highlight-text transition-colors">non-verbal signals</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5: Section Divider -->
+            <div class="slide flex-col justify-center items-center h-full bg-gradient-to-br from-blue-600 to-indigo-800 rounded-3xl shadow-2xl relative overflow-hidden" id="slide-5">
+                <i class="fas fa-layer-group text-[150px] text-white/10 absolute -right-10 -bottom-10"></i>
+                <i class="fas fa-project-diagram text-[120px] text-white/10 absolute -left-10 top-10"></i>
+                <div class="bg-white/20 p-8 rounded-full mb-8 backdrop-blur-sm">
+                    <i class="fas fa-layer-group text-6xl lg:text-7xl text-white"></i>
+                </div>
+                <h1 class="text-5xl lg:text-7xl font-extrabold text-white tracking-wide text-center drop-shadow-lg">Module Design &<br>TLP Features</h1>
+            </div>
+
+            <!-- Slide 6: Major Topics -->
+            <div class="slide flex-col h-full" id="slide-6">
+                <div class="flex justify-between items-center mb-12">
+                    <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 border-l-8 border-blue-500 pl-6">Major Topics</h2>
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-800 font-bold px-6 py-3 rounded-full text-xl shadow-sm border border-blue-200 flex items-center gap-3">
+                        <i class="fas fa-clock text-blue-500"></i> 13 TLP Units for 30 Contact Hours
+                    </div>
+                </div>
+                
+                <div class="relative mt-8 px-10 flex-1 flex flex-col justify-center">
+                    <div class="flex justify-around w-full relative z-10 gap-10">
+                        <!-- Flip Card 1 -->
+                        <div class="cursor-pointer perspective w-full max-w-md h-80" onclick="this.querySelector('.preserve-3d').classList.toggle('my-rotate-y-180')">
+                            <div class="relative preserve-3d w-full h-full duration-700 ease-in-out shadow-xl rounded-3xl">
+                                <!-- Front -->
+                                <div class="absolute backface-hidden w-full h-full bg-white rounded-3xl border border-gray-100 flex flex-col items-center justify-center">
+                                    <span class="text-gray-400 font-bold mb-4 uppercase tracking-widest text-lg">Stage</span>
+                                    <span class="text-8xl lg:text-9xl font-black text-blue-500 drop-shadow-sm">1</span>
+                                    <div class="mt-8 text-blue-500 bg-blue-50 px-5 py-2 rounded-full text-sm font-bold border border-blue-100"><i class="fas fa-hand-pointer mr-2 animate-bounce"></i>Click to reveal</div>
+                                </div>
+                                <!-- Back -->
+                                <div class="absolute my-rotate-y-180 backface-hidden w-full h-full bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl p-8 text-white flex flex-col items-center justify-center text-center relative">
+                                    <i class="fas fa-microphone-alt text-6xl mb-6 opacity-90 mt-[-20px]"></i>
+                                    <h3 class="text-3xl lg:text-4xl font-bold mb-4">Briefing</h3>
+                                    <p class="text-xl lg:text-2xl font-medium leading-relaxed opacity-90">Brief different teams on the operations of the upcoming events</p>
+                                    <div class="absolute bottom-6 right-6 bg-white/20 px-4 py-1 rounded-full text-sm font-bold tracking-wider border border-white/30">Units 1-6</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flip Card 2 -->
+                        <div class="cursor-pointer perspective w-full max-w-md h-80" onclick="this.querySelector('.preserve-3d').classList.toggle('my-rotate-y-180')">
+                            <div class="relative preserve-3d w-full h-full duration-700 ease-in-out shadow-xl rounded-3xl">
+                                <!-- Front -->
+                                <div class="absolute backface-hidden w-full h-full bg-white rounded-3xl border border-gray-100 flex flex-col items-center justify-center">
+                                    <span class="text-gray-400 font-bold mb-4 uppercase tracking-widest text-lg">Stage</span>
+                                    <span class="text-8xl lg:text-9xl font-black text-green-500 drop-shadow-sm">2</span>
+                                    <div class="mt-8 text-green-500 bg-green-50 px-5 py-2 rounded-full text-sm font-bold border border-green-100"><i class="fas fa-hand-pointer mr-2 animate-bounce"></i>Click to reveal</div>
+                                </div>
+                                <!-- Back -->
+                                <div class="absolute my-rotate-y-180 backface-hidden w-full h-full bg-gradient-to-br from-green-500 to-green-700 rounded-3xl p-8 text-white flex flex-col items-center justify-center text-center relative">
+                                    <i class="fas fa-phone text-6xl mb-6 opacity-90 mt-[-20px]"></i>
+                                    <h3 class="text-3xl lg:text-4xl font-bold mb-4">Telephone</h3>
+                                    <p class="text-xl lg:text-2xl font-medium leading-relaxed opacity-90">Handle potential clients’ enquiries about event packages</p>
+                                    <div class="absolute bottom-6 right-6 bg-white/20 px-4 py-1 rounded-full text-sm font-bold tracking-wider border border-white/30">Units 7-13</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7: Consideration -->
+            <div class="slide flex-col h-full" id="slide-7">
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-16 border-l-8 border-blue-500 pl-6">Consideration</h2>
+                
+                <div class="flex items-center justify-center space-x-10 flex-1">
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 text-center w-[350px] h-[300px] shadow-lg flex flex-col items-center justify-center">
+                        <div class="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mb-6">
+                            <i class="fas fa-comments text-4xl text-gray-500"></i>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800 leading-tight">Programme Leaders’<br>views considered</p>
+                    </div>
+                    
+                    <div class="flex flex-col items-center justify-center">
+                        <svg class="w-20 h-20 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-3xl border border-blue-200 text-center w-[350px] h-[300px] shadow-lg flex flex-col items-center justify-center cursor-pointer hover:shadow-xl hover:scale-105 transition-all group relative overflow-hidden" onclick="playSequence(['img 1.jpg', 'img 2.png'], ['Authentic Material 1', 'Authentic Material 2'])">
+                        <div class="absolute -right-10 -bottom-10 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <i class="fas fa-file-alt text-[150px] text-blue-900"></i>
+                        </div>
+                        <div class="bg-white w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-md relative z-10">
+                            <i class="fas fa-file-signature text-4xl text-blue-600"></i>
+                        </div>
+                        <p class="text-xl font-bold text-blue-900 mb-6 relative z-10">Reference made to programme authentic materials</p>
+                        <div class="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md group-hover:bg-blue-700 transition-colors relative z-10">
+                            <i class="fas fa-search mr-2"></i> Click to view
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8: Flow -->
+            <div class="slide flex-col h-full" id="slide-8">
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-16 border-l-8 border-blue-500 pl-6">Flow of Each Unit</h2>
+                
+                <div class="flex items-center justify-center space-x-4 flex-1">
+                    <div class="text-center w-56 group cursor-pointer" style="--active-color: #3b82f6;" onclick="this.querySelector('.circle-btn').classList.toggle('circle-active')">
+                        <div class="circle-btn w-40 h-40 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-blue-100 group-hover:border-blue-400 transition-all">
+                            <i class="fas fa-user-tie text-6xl text-blue-500"></i>
+                        </div>
+                        <div class="text-gray-800 font-bold text-2xl">Role</div>
+                    </div>
+                    
+                    <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    
+                    <div class="text-center w-56 group cursor-pointer" style="--active-color: #22c55e;" onclick="this.querySelector('.circle-btn').classList.toggle('circle-active')">
+                        <div class="circle-btn w-40 h-40 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-green-100 group-hover:border-green-400 transition-all">
+                            <i class="fas fa-tasks text-6xl text-green-500"></i>
+                        </div>
+                        <div class="text-gray-800 font-bold text-2xl">Tasks</div>
+                    </div>
+                    
+                    <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    
+                    <div class="text-center w-56 group cursor-pointer" style="--active-color: #a855f7;" onclick="this.querySelector('.circle-btn').classList.toggle('circle-active')">
+                        <div class="circle-btn w-40 h-40 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl border-4 border-purple-100 group-hover:border-purple-400 transition-all">
+                            <i class="fas fa-language text-6xl text-purple-500"></i>
+                        </div>
+                        <div class="text-gray-800 font-bold text-2xl">Language</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 9: Emphasis -->
+            <div class="slide flex-col h-full" id="slide-9">
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-10 border-l-8 border-blue-500 pl-6">Emphasis</h2>
+                
+                <div class="grid grid-cols-4 gap-6 flex-1">
+                    <div class="cursor-pointer group rounded-3xl overflow-hidden shadow-lg relative" onclick="playSequence(['img 3.jpg', 'img 4.jpg', 'img 5.jpg'], ['Vocabulary 1', 'Vocabulary 2', 'Vocabulary 3'])">
+                        <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-blue-900/70 group-hover:bg-blue-900/50 transition-colors"></div>
+                        <div class="relative h-full flex flex-col items-center justify-center text-white p-6 text-center">
+                            <i class="fas fa-book text-5xl mb-4 drop-shadow-md"></i>
+                            <div class="font-bold text-2xl tracking-wide">Vocabulary</div>
+                        </div>
+                    </div>
+                    <div class="cursor-pointer group rounded-3xl overflow-hidden shadow-lg relative" onclick="playSequence(['img 6.jpg', 'img 7.jpg', 'img 10.jpg'], ['Listening 1', 'Listening 2', 'Listening 3'])">
+                        <img src="https://images.unsplash.com/photo-1589903308904-1010c2294adc?auto=format&fit=crop&w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-green-900/70 group-hover:bg-green-900/50 transition-colors"></div>
+                        <div class="relative h-full flex flex-col items-center justify-center text-white p-6 text-center">
+                            <i class="fas fa-headphones text-5xl mb-4 drop-shadow-md"></i>
+                            <div class="font-bold text-2xl tracking-wide">Listening</div>
+                        </div>
+                    </div>
+                    <div class="cursor-pointer group rounded-3xl overflow-hidden shadow-lg relative" onclick="playSequence(['img 8.jpg', 'img 9.jpg'], ['Speaking 1', 'Speaking 2'])">
+                        <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-purple-900/70 group-hover:bg-purple-900/50 transition-colors"></div>
+                        <div class="relative h-full flex flex-col items-center justify-center text-white p-6 text-center">
+                            <i class="fas fa-comments text-5xl mb-4 drop-shadow-md"></i>
+                            <div class="font-bold text-2xl tracking-wide">Speaking</div>
+                        </div>
+                    </div>
+                    <div class="cursor-pointer group rounded-3xl overflow-hidden shadow-lg relative" onclick="playSequence(['img 11.jpg', 'img 12.jpg', 'img 13.jpg', 'img 15.jpg', 'img 14.jpg', 'img 16.jpg'], ['Language 1', 'Language 2', 'Language 3', 'Language 4', 'Language 5', 'Language 6'])">
+                        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-orange-900/70 group-hover:bg-orange-900/50 transition-colors"></div>
+                        <div class="relative h-full flex flex-col items-center justify-center text-white p-6 text-center">
+                            <i class="fas fa-globe text-5xl mb-4 drop-shadow-md"></i>
+                            <div class="font-bold text-2xl tracking-wide">Language</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-8">
+                    <span class="bg-gray-800 text-white text-base px-6 py-2 rounded-full inline-flex items-center gap-3 shadow-md animate-bounce">
+                        <i class="fas fa-hand-pointer"></i> Click on any category to view examples!
+                    </span>
+                </div>
+            </div>
+
+            <!-- Slide 10: Section Divider -->
+            <div class="slide flex-col justify-center items-center h-full bg-gradient-to-br from-slate-700 to-slate-900 rounded-3xl shadow-2xl relative overflow-hidden" id="slide-10">
+                <i class="fas fa-clipboard-check text-[200px] text-white/5 absolute right-10 bottom-10"></i>
+                <div class="bg-white/10 p-8 rounded-full mb-8 backdrop-blur-md border border-white/20">
+                    <i class="fas fa-clipboard-list text-7xl text-white"></i>
+                </div>
+                <h1 class="text-5xl lg:text-7xl font-extrabold text-white tracking-wide drop-shadow-lg">Assessment Components</h1>
+            </div>
+
+            <!-- Slide 11: Assessments -->
+            <div class="slide flex-col h-full" id="slide-11">
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-10 border-l-8 border-blue-500 pl-6">Assessments</h2>
+                
+                <div class="relative w-full mx-auto flex-1 flex items-center justify-center">
+                    <div class="flex justify-around w-full relative z-10 px-4">
+                        <div class="flex flex-col items-center group">
+                            <div class="bg-white text-gray-800 font-bold text-2xl mb-8 px-6 py-3 rounded-full shadow-sm border border-gray-200">CA: Briefing</div>
+                            <div class="w-56 h-56 rounded-full border-[14px] border-gray-100 border-t-blue-500 border-r-blue-500 flex items-center justify-center bg-white shadow-xl transform -rotate-45 group-hover:scale-110 transition-transform">
+                                <span class="text-5xl font-black text-blue-600 transform rotate-45">40%</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center group">
+                            <div class="bg-white text-gray-800 font-bold text-2xl mb-8 px-6 py-3 rounded-full shadow-sm border border-gray-200">EA1: e-Quiz</div>
+                            <div class="w-56 h-56 rounded-full border-[14px] border-gray-100 border-t-green-500 flex items-center justify-center bg-white shadow-xl transform -rotate-45 group-hover:scale-110 transition-transform">
+                                <span class="text-5xl font-black text-green-600 transform rotate-45">10%</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center group">
+                            <div class="bg-white text-gray-800 font-bold text-2xl mb-8 px-6 py-3 rounded-full shadow-sm border border-gray-200">EA2: Telephone</div>
+                            <div class="w-56 h-56 rounded-full border-[14px] border-gray-100 border-t-purple-500 border-r-purple-500 border-b-purple-500 flex items-center justify-center bg-white shadow-xl transform -rotate-45 group-hover:scale-110 transition-transform">
+                                <span class="text-5xl font-black text-purple-600 transform rotate-45">50%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 12: EA1 -->
+            <div class="slide flex-row gap-8 h-full" id="slide-12">
+                <div class="w-2/3 flex flex-col">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-8 border-l-8 border-green-500 pl-6">EA1: Moodle e-Quiz</h2>
+                    
+                    <div class="relative bg-white rounded-2xl shadow-md border border-gray-300 overflow-hidden flex-1 group">
+                        <div class="absolute -bottom-12 -right-12 w-64 h-64 rounded-full border-[24px] border-gray-50 border-t-green-500 flex items-center justify-center opacity-30 transform -rotate-45 group-hover:opacity-100 group-hover:scale-110 group-hover:-translate-y-6 group-hover:-translate-x-6 transition-all duration-500 z-0 shadow-xl bg-white">
+                            <span class="text-5xl font-black text-green-600 transform rotate-45">10%</span>
+                        </div>
+                        
+                        <table class="relative z-10 w-full text-left border-collapse h-full">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-800 text-xl border-b-[3px] border-gray-300">
+                                    <th class="p-5 w-1/2 font-bold">Topic</th>
+                                    <th class="p-5 w-1/2 font-bold">Question Type</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-lg text-gray-800 divide-y divide-gray-300">
+                                <tr>
+                                    <td class="p-5 font-medium">Use of Prepositions</td>
+                                    <td class="p-5 border-l border-gray-300 bg-gray-50/80" rowspan="5">
+                                        <div class="flex flex-col gap-5 items-start pl-2">
+                                            <span class="flex items-center gap-3 bg-white px-5 py-3 rounded-lg shadow-sm w-full border border-gray-200"><i class="fas fa-hand-pointer text-blue-500 text-2xl w-8"></i> Drag and Drop</span>
+                                            <span class="flex items-center gap-3 bg-white px-5 py-3 rounded-lg shadow-sm w-full border border-gray-200"><i class="fas fa-headphones text-green-500 text-2xl w-8"></i> Listening</span>
+                                            <span class="flex items-center gap-3 bg-white px-5 py-3 rounded-lg shadow-sm w-full border border-gray-200"><i class="fas fa-check-square text-purple-500 text-2xl w-8"></i> MCQ</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr><td class="p-5 font-medium">Use of Connectives</td></tr>
+                                <tr><td class="p-5 font-medium">Verb-noun Collocation</td></tr>
+                                <tr><td class="p-5 font-medium">Making polite requests</td></tr>
+                                <tr><td class="p-5 font-medium">Understanding clients' requests</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="w-1/3 flex flex-col gap-6">
+                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80" class="w-full h-56 object-cover rounded-2xl shadow-md" alt="Quiz">
+                    <div class="bg-slate-800 text-white rounded-2xl p-6 shadow-lg flex flex-col justify-center gap-5 flex-1">
+                        <div class="flex items-center gap-4 text-xl font-bold">
+                            <div class="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center"><i class="fas fa-clock"></i></div>
+                            16 Questions<br>25 minutes
+                        </div>
+                        <div class="h-px bg-white/20 w-full"></div>
+                        <div class="flex items-center gap-4 text-xl font-bold text-yellow-400">
+                            <div class="w-12 h-12 bg-yellow-400/20 text-yellow-400 rounded-full flex items-center justify-center"><i class="fas fa-infinity"></i></div>
+                            Unlimited Attempts
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 13: CA Briefing -->
+            <div class="slide flex-row gap-8 h-full" id="slide-13">
+                <div class="w-2/3 flex flex-col">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-8 border-l-8 border-blue-500 pl-6">CA: Briefing</h2>
+                    
+                    <div class="relative bg-white rounded-2xl shadow-md border border-gray-300 flex-1 overflow-hidden group">
+                        <div class="absolute -bottom-12 -right-12 w-64 h-64 rounded-full border-[24px] border-gray-50 border-t-blue-500 border-r-blue-500 flex items-center justify-center opacity-30 transform -rotate-45 group-hover:opacity-100 group-hover:scale-110 group-hover:-translate-y-6 group-hover:-translate-x-6 transition-all duration-500 z-0 shadow-xl bg-white">
+                            <span class="text-5xl font-black text-blue-600 transform rotate-45">40%</span>
+                        </div>
+
+                        <table class="relative z-10 w-full text-left border-collapse h-full">
+                            <tbody class="text-lg text-gray-800 divide-y divide-gray-300">
+                                <tr><th class="p-5 bg-gray-100 w-1/3 font-bold text-gray-900">Schedule:</th><td class="p-5">13<sup>th</sup> – 14<sup>th</sup> contact hours</td></tr>
+                                <tr><th class="p-5 bg-gray-100 font-bold text-gray-900">Mode:</th><td class="p-5">F2F Briefing</td></tr>
+                                <tr><th class="p-5 bg-gray-100 font-bold text-gray-900">Interlocutors:</th><td class="p-5">Staff</td></tr>
+                                <tr>
+                                    <th class="p-5 bg-gray-100 align-top font-bold text-gray-900">Functions:</th>
+                                    <td class="p-5">
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li>Greetings, introduction, leave-taking</li>
+                                            <li>Description, Invitation, Thanks</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="p-5 bg-gray-100 align-top font-bold text-gray-900">Topics:</th>
+                                    <td class="p-5"><ul class="list-disc list-inside"><li>Event arrangements & Logistics</li></ul></td>
+                                </tr>
+                                <tr class="bg-red-50/90">
+                                    <th class="p-5 text-red-700 font-bold align-top border-l-4 border-red-500">Duration:</th>
+                                    <td class="p-5 text-red-800 font-medium">
+                                        <ul class="space-y-2">
+                                            <li><i class="fas fa-stopwatch mr-2"></i>Prep Time: 5 mins</li>
+                                            <li><i class="fas fa-video mr-2"></i>Assessment: 2 mins (Video-taped)</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="w-1/3 flex items-center">
+                    <div class="w-full h-full rounded-2xl overflow-hidden shadow-lg relative">
+                        <img src="https://images.unsplash.com/photo-1558403194-611308249627?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover" alt="Briefing Presentation">
+                        <div class="absolute inset-0 bg-blue-900/20"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 14: Sample Unit 6 -->
+            <div class="slide flex-col h-full" id="slide-14">
+                <h2 class="text-4xl font-bold text-gray-800 mb-6 border-l-8 border-blue-500 pl-6 shrink-0">Sample (Unit 6)</h2>
+                
+                <div class="flex-1 min-h-0 rounded-2xl shadow-md border border-gray-300 bg-white overflow-hidden flex flex-col">
+                    <div class="overflow-y-auto custom-scroll flex-1">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="sticky top-0 z-10 bg-gray-100 shadow-sm border-b-[3px] border-gray-300">
+                                <tr class="text-gray-900 text-lg uppercase tracking-wider">
+                                    <th class="p-5 w-1/5 font-bold">Section</th>
+                                    <th class="p-5 w-3/5 font-bold">Script</th>
+                                    <th class="p-5 w-1/5 font-bold text-center">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-lg text-gray-800 divide-y divide-gray-300">
+                                <tr>
+                                    <td class="p-5 font-bold text-gray-900 bg-gray-50/50">1. Introduction</td>
+                                    <td class="p-5 leading-relaxed">Good morning. I’m Clair Chow from the Event Management & Operation Section. Today I’m going to brief you on an event order.</td>
+                                    <td rowspan="2" class="p-5 align-middle text-center border-l border-gray-300 bg-blue-50/50">
+                                        <button onclick="playSequence(['', 'img 17.jpg', 'img 18.jpg', 'img 19.jpg'], ['<div class=\'text-left p-6\'><h3 class=\'font-bold text-2xl text-blue-800 mb-4\'><i class=\'fas fa-file-alt mr-2\'></i>Preparatory Task:</h3><ul class=\'list-disc list-inside text-gray-700 text-lg space-y-2\'><li>To be given to Ss prior to the assessment</li><li>Allowed to be brought to the assessment venue</li></ul></div>', 'Image 17', 'Image 18', 'Image 19'])" class="w-16 h-16 bg-white border-2 border-blue-400 text-blue-600 hover:bg-blue-600 hover:text-white rounded-full flex items-center justify-center transition-all shadow-md mx-auto group relative">
+                                            <i class="fas fa-search-plus text-2xl"></i>
+                                            <span class="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg z-20">View Task</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-5 font-bold text-gray-900 bg-gray-50/50">2. Background Information</td>
+                                    <td class="p-5 leading-relaxed">Let’s start with the background information. Classy Tailor will be holding a fashion Show at our hotel. It will be on the 18<sup>th</sup> of February, from 7:30 pm to 10:30 pm at our Grand Ballroom. There will be 130 guests.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-5 font-bold text-gray-900 bg-gray-50/50">3. Duties of Different Teams</td>
+                                    <td class="p-5 leading-relaxed">For the duties of different teams, would the Food and Beverage Team please arrange refreshments, including buffet and drinks stations? For the Front Office Team, please arrange four staff members to greet and guide VIP guests on their arrival. Also, the Marketing Team should coordinate social media activities, and the Event Management & Operations Team will be preparing the welcome packs.</td>
+                                    <td rowspan="2" class="p-5 align-middle text-center border-l border-gray-300 bg-green-50/50">
+                                        <button onclick="playSequence(['img 20.jpg'], ['Image 20'])" class="w-16 h-16 bg-white border-2 border-green-400 text-green-600 hover:bg-green-600 hover:text-white rounded-full flex items-center justify-center transition-all shadow-md mx-auto group relative">
+                                            <i class="fas fa-comment-dots text-2xl"></i>
+                                            <span class="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-sm px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg z-20">Reminders</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-5 font-bold text-gray-900 bg-gray-50/50">4. Invitation</td>
+                                    <td class="p-5 leading-relaxed">To confirm the event rundown, we will have a site tour with the client at 10 am this Friday. Please join us if possible / if you are free.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-5 font-bold text-gray-900 bg-gray-50/50">5. Closing</td>
+                                    <td class="p-5 leading-relaxed">If you have any questions, please feel free to contact me. Thank you.</td>
+                                    <td class="p-5 border-l border-gray-300 bg-gray-50/50"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 15: EA2 Telephone -->
+            <div class="slide flex-row gap-8 h-full" id="slide-15">
+                <div class="w-2/3 flex flex-col">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-8 border-l-8 border-purple-500 pl-6">EA2: Telephone Conversation</h2>
+                    
+                    <div class="relative bg-white rounded-2xl shadow-md border border-gray-300 flex-1 overflow-hidden group">
+                        <div class="absolute -bottom-12 -right-12 w-64 h-64 rounded-full border-[24px] border-gray-50 border-t-purple-500 border-r-purple-500 border-b-purple-500 flex items-center justify-center opacity-30 transform -rotate-45 group-hover:opacity-100 group-hover:scale-110 group-hover:-translate-y-6 group-hover:-translate-x-6 transition-all duration-500 z-0 shadow-xl bg-white">
+                            <span class="text-5xl font-black text-purple-600 transform rotate-45">50%</span>
+                        </div>
+
+                        <table class="relative z-10 w-full text-left border-collapse h-full">
+                            <tbody class="text-lg text-gray-800 divide-y divide-gray-300">
+                                <tr><th class="p-5 bg-gray-100 w-1/3 font-bold text-gray-900">Schedule:</th><td class="p-5">29<sup>th</sup> – 30<sup>th</sup> contact hours</td></tr>
+                                <tr><th class="p-5 bg-gray-100 font-bold text-gray-900">Mode:</th><td class="p-5">Telephone Conversation</td></tr>
+                                <tr><th class="p-5 bg-gray-100 font-bold text-gray-900">Interlocutors:</th><td class="p-5">Client (by T) & Staff (by S)</td></tr>
+                                <tr>
+                                    <th class="p-5 bg-gray-100 align-top font-bold text-gray-900">Functions:</th>
+                                    <td class="p-5">
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li>Greetings, introduction, leave-taking</li>
+                                            <li>Description, Requests, Offer</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="p-5 bg-gray-100 align-top font-bold text-gray-900">Topics:</th>
+                                    <td class="p-5"><ul class="list-disc list-inside"><li>Event packages, Price, Promo offers</li></ul></td>
+                                </tr>
+                                <tr class="bg-red-50/90">
+                                    <th class="p-5 text-red-700 font-bold align-top border-l-4 border-red-500">Duration:</th>
+                                    <td class="p-5 text-red-800 font-medium">
+                                        <ul class="space-y-2">
+                                            <li><i class="fas fa-stopwatch mr-2"></i>Prep Time: 5 mins</li>
+                                            <li><i class="fas fa-microphone mr-2"></i>Assessment: 4 mins (Audio-taped)</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="w-1/3 flex items-center">
+                    <div class="w-full h-full rounded-2xl overflow-hidden shadow-lg relative">
+                        <img src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover" alt="Customer Service">
+                        <div class="absolute inset-0 bg-purple-900/20"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 16: Sample Unit 13 -->
+            <div class="slide flex-col h-full" id="slide-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-6 border-l-8 border-purple-500 pl-6 shrink-0">Sample (Unit 13)</h2>
+                
+                <div class="flex flex-1 overflow-hidden space-x-6 pb-2 min-h-0">
+                    <div class="w-3/4 overflow-y-auto custom-scroll rounded-2xl shadow-md border border-gray-300 bg-white h-full">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="sticky top-0 z-10 bg-gray-100 shadow-sm border-b-[3px] border-gray-300">
+                                <tr class="text-gray-900 text-lg uppercase tracking-wider">
+                                    <th class="p-4 w-32 text-center font-bold">Role</th>
+                                    <th class="p-4 font-bold">Script</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-lg divide-y divide-gray-300">
+                                <tr><td class="p-4 font-bold text-gray-500 text-center bg-gray-50/50">Client:</td><td class="p-4 text-gray-400">...</td></tr>
+                                <tr>
+                                    <td class="p-4 font-bold text-blue-600 text-center bg-blue-50/50">Staff:</td>
+                                    <td class="p-4 text-gray-900">Good morning. This is Rocky Poon from the International Hotel. We’ve received your enquiry about our event packages. May I know more about your event?</td>
+                                </tr>
+                                <tr><td class="p-4 font-bold text-gray-500 text-center bg-gray-50/50">Client:</td><td class="p-4 text-gray-400">...</td></tr>
+                                <tr>
+                                    <td class="p-4 font-bold text-blue-600 text-center bg-blue-50/50 align-top">Staff:</td>
+                                    <td class="p-4">
+                                        <p class="text-sm text-blue-700 font-bold mb-3 bg-blue-100 inline-block px-3 py-1.5 rounded border border-blue-200"><i class="fas fa-lightbulb mr-1"></i> Hint: Describe the details of the package, incl. use of venue, features, complimentary services & pricing</p>
+                                        <p class="text-gray-900 leading-relaxed">Sure! Our Show & Tell Package would be perfect for your event. The package includes 12 hours' use of our Grand Ballroom. It covers 7,000 square feet of space, and it can accommodate up to 300 guests. The venue features a grand layout, including an 8-metre high ceiling and a 360-degree harbour view. Also, the package includes free-flow soft drinks during the event. The package is priced at $180,000 per event.</p>
+                                    </td>
+                                </tr>
+                                <tr><td class="p-4 font-bold text-gray-500 text-center bg-gray-50/50">Client:</td><td class="p-4 text-gray-400">...</td></tr>
+                                <tr>
+                                    <td class="p-4 font-bold text-blue-600 text-center bg-blue-50/50 align-top">Staff:</td>
+                                    <td class="p-4">
+                                        <p class="text-sm text-blue-700 font-bold mb-3 bg-blue-100 inline-block px-3 py-1.5 rounded border border-blue-200"><i class="fas fa-lightbulb mr-1"></i> Hint: Describe the add-on items</p>
+                                        <p class="text-gray-900 leading-relaxed">You can add our dim sum refreshment package for only HK$80 per person. Also, you can book our private meeting rooms for HK$2,000 per day.</p>
+                                    </td>
+                                </tr>
+                                <tr><td class="p-4 font-bold text-gray-500 text-center bg-gray-50/50">Client:</td><td class="p-4 text-gray-400">...</td></tr>
+                                <tr>
+                                    <td class="p-4 font-bold text-blue-600 text-center bg-blue-50/50 align-top">Staff:</td>
+                                    <td class="p-4">
+                                        <p class="text-sm text-blue-700 font-bold mb-3 bg-blue-100 inline-block px-3 py-1.5 rounded border border-blue-200"><i class="fas fa-lightbulb mr-1"></i> Hint: Describe the conditional offers & offer help</p>
+                                        <p class="text-gray-900 leading-relaxed">
+                                            <span class="bg-yellow-200 px-1 rounded cursor-help relative group inline-block">
+                                                For bookings made 3 months in advance, we’ll offer free parking for up to 5 vehicles on the event day.
+                                                <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-gray-800 text-white text-sm px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20 shadow-lg after:content-[''] after:absolute after:top-full after:left-1/2 after:-translate-x-1/2 after:border-4 after:border-transparent after:border-t-gray-800">Student's Self-idea</span>
+                                            </span>
+                                            Would you like to book the package now?
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr><td class="p-4 font-bold text-gray-500 text-center bg-gray-50/50">Client:</td><td class="p-4 text-gray-400">...</td></tr>
+                                <tr>
+                                    <td class="p-4 font-bold text-blue-600 text-center bg-blue-50/50 align-top">Staff:</td>
+                                    <td class="p-4 text-gray-900 leading-relaxed">No problem. Feel free to call us if you want to make a reservation. Is there anything else I can help you with?</td>
+                                </tr>
+                                <tr><td class="p-4 font-bold text-gray-500 text-center bg-gray-50/50">Client:</td><td class="p-4 text-gray-400">...</td></tr>
+                                <tr>
+                                    <td class="p-4 font-bold text-blue-600 text-center bg-blue-50/50 align-top">Staff:</td>
+                                    <td class="p-4 text-gray-900 leading-relaxed">You're most welcome. Have a great day!</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="w-1/4 bg-gradient-to-b from-gray-50 to-gray-100 rounded-2xl shadow-md border border-gray-300 p-6 flex flex-col items-center justify-center text-center h-full">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-8">Remarks</h3>
+                        
+                        <button onclick="playSequence(
+                            ['', 'img 21.jpg', 'img 22.jpg', 'img 23.jpg', 'img 24.jpg', 'img 25.jpg', '', 'img 26.jpg', '', 'img 27.jpg'], 
+                            [
+                                '<div class=\'text-left p-6\'><h3 class=\'font-bold text-2xl text-blue-800 mb-4\'>Preparatory Task:</h3><ul class=\'list-disc list-inside text-gray-700 text-lg\'><li>To be given to Ss prior to the assessment</li><li>Allowed to be brought to the assessment venue</li></ul></div>', 
+                                'Image 21', 'Image 22', 'Image 23', 'Image 24', 'Image 25',
+                                '<div class=\'text-left p-6\'><h3 class=\'font-bold text-2xl text-blue-800 mb-4\'>Assessment Paper:</h3><ul class=\'list-disc list-inside text-gray-700 text-lg\'><li>To be given to Ss on the spot before the preparation time</li></ul></div>',
+                                'Image 26',
+                                '<div class=\'text-left p-6\'><h3 class=\'font-bold text-2xl text-blue-800 mb-4\'>Teacher’s Guide:</h3><ul class=\'list-disc list-inside text-gray-700 text-lg\'><li>To be given to T on the spot</li><li>T should adhere to the scripts provided when role-playing the client</li></ul></div>',
+                                'Image 27'
+                            ]
+                        )" class="w-28 h-28 bg-white border-4 border-blue-300 text-blue-600 rounded-full flex flex-col items-center justify-center hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all shadow-lg group relative">
+                            <i class="fas fa-folder-open text-4xl group-hover:scale-110 transition-transform"></i>
+                            <span class="absolute -top-12 bg-gray-800 text-white text-sm px-4 py-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">View All Files</span>
+                        </button>
+                        
+                        <p class="mt-8 text-base text-gray-600 font-medium">Click to view Preparatory Tasks, Assessment Papers, and Teacher's Guides.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 17: Resources -->
+            <div class="slide flex-col h-full" id="slide-17">
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-10 border-l-8 border-blue-500 pl-6">T&L Resources</h2>
+                
+                <div class="grid grid-cols-2 gap-6 flex-1 pb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-6 hover:shadow-md transition-shadow">
+                        <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl"><i class="fas fa-box-open"></i></div>
+                        <span class="text-2xl font-semibold text-gray-700">Teaching & Learning Package</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-6 hover:shadow-md transition-shadow">
+                        <div class="w-16 h-16 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center text-3xl"><i class="fas fa-graduation-cap"></i></div>
+                        <span class="text-2xl font-semibold text-gray-700">Moodle Course</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-6 hover:shadow-md transition-shadow">
+                        <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center text-3xl"><i class="fas fa-play-circle"></i></div>
+                        <span class="text-2xl font-semibold text-gray-700">Online Video Lessons</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-6 hover:shadow-md transition-shadow">
+                        <div class="w-16 h-16 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-3xl"><i class="fas fa-puzzle-piece"></i></div>
+                        <span class="text-2xl font-semibold text-gray-700">Wordwall Exercises</span>
+                    </div>
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-2xl shadow-lg flex items-center gap-6 col-span-2 hover:scale-[1.02] transition-transform cursor-pointer group" onclick="window.open('https://vtc-lc-exercise.github.io/HLA2110-Super-Hero-Playbook/', '_blank')">
+                        <div class="w-16 h-16 bg-white/20 text-white rounded-2xl flex items-center justify-center text-3xl"><i class="fas fa-laptop-code"></i></div>
+                        <div class="flex-1">
+                            <span class="text-2xl font-bold text-white block">Interactive HTML Platform</span>
+                            <span class="text-blue-100 text-base mt-1 block">Click to access the Super Hero Playbook</span>
+                        </div>
+                        <i class="fas fa-external-link-alt text-2xl text-white/50 group-hover:text-white transition-colors"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 18 -->
+            <div class="slide flex-col justify-center items-center h-full bg-slate-900 rounded-3xl shadow-2xl relative overflow-hidden" id="slide-18">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80" class="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay">
+                <div class="relative z-10 flex flex-col items-center">
+                    <i class="fas fa-question-circle text-7xl text-blue-400 mb-6 drop-shadow-lg"></i>
+                    <h1 class="text-6xl lg:text-7xl font-extrabold text-white tracking-wide mb-6">Q&A Session</h1>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="h-16 border-t border-gray-200 flex justify-between items-center px-8 bg-gray-50/80 backdrop-blur-md rounded-b-3xl relative z-20">
+            <button onclick="prevSlide()" class="w-10 h-10 text-gray-500 bg-white border border-gray-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 rounded-full flex items-center justify-center transition-all shadow-sm">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="text-sm font-bold text-gray-500 tracking-widest bg-white border border-gray-200 px-5 py-1.5 rounded-full shadow-sm">
+                <span id="slide-counter">1 / 18</span>
+            </div>
+            <button onclick="nextSlide()" class="w-10 h-10 text-gray-500 bg-white border border-gray-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 rounded-full flex items-center justify-center transition-all shadow-sm">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <div id="lightbox" class="fixed inset-0 z-50 flex-col bg-slate-900/95">
+        <div class="h-20 flex justify-between items-center px-8 text-white border-b border-white/10">
+            <div id="lightbox-title" class="text-2xl font-bold text-blue-400"></div>
+            <div class="flex space-x-3">
+                <button onclick="zoomImage(0.2)" class="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-xl"><i class="fas fa-search-plus"></i></button>
+                <button onclick="zoomImage(-0.2)" class="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-xl"><i class="fas fa-search-minus"></i></button>
+                <button onclick="resetZoom()" class="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-xl"><i class="fas fa-compress"></i></button>
+                <div class="w-px h-8 bg-white/20 my-auto mx-2"></div>
+                <button onclick="closeLightbox()" class="w-12 h-12 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors text-xl"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        
+        <div class="flex-1 flex items-center justify-center relative p-8">
+            <button id="lb-prev" onclick="lbPrev()" class="absolute left-8 w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center z-10 transition-colors text-2xl"><i class="fas fa-chevron-left"></i></button>
+            
+            <div class="zoom-container w-full h-full relative">
+                <div id="lightbox-text" class="hidden bg-white p-10 rounded-2xl shadow-2xl max-w-3xl w-full text-gray-800 text-xl"></div>
+                <img id="lightbox-img" src="" alt="" class="hidden shadow-2xl rounded-xl max-h-full">
+            </div>
+
+            <button id="lb-next" onclick="lbNext()" class="absolute right-8 w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center z-10 transition-colors text-2xl"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <div class="h-16 flex justify-center items-center text-gray-400 text-lg pb-6 font-medium tracking-widest">
+            <span id="lb-counter"></span>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 18; 
+
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.getElementById(`slide-${currentSlide}`).classList.add('active');
+            document.getElementById('slide-counter').innerText = `${currentSlide} / ${totalSlides}`;
+            document.getElementById('progress-bar').style.width = `${((currentSlide - 1) / (totalSlides - 1)) * 100}%`;
+        }
+
+        function nextSlide() { if (currentSlide < totalSlides) { currentSlide++; updateSlide(); } }
+        function prevSlide() { if (currentSlide > 1) { currentSlide--; updateSlide(); } }
+        function goToSlide(slideNum) {
+            if (slideNum >= 1 && slideNum <= totalSlides) { currentSlide = slideNum; updateSlide(); }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('lightbox').classList.contains('active')) return; 
+            if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'PageDown') nextSlide();
+            if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+        });
+
+        let seqImages = [], seqTitles = [], seqIndex = 0, currentZoom = 1;
+
+        function playSequence(images, titles) {
+            seqImages = images; seqTitles = titles; seqIndex = 0;
+            document.getElementById('lightbox').classList.add('active');
+            renderLightboxContent();
+        }
+
+        function renderLightboxContent() {
+            resetZoom();
+            const imgEl = document.getElementById('lightbox-img');
+            const textEl = document.getElementById('lightbox-text');
+            const titleEl = document.getElementById('lightbox-title');
+            
+            const currentItem = seqImages[seqIndex];
+            titleEl.innerHTML = seqTitles[seqIndex] || 'Information';
+
+            if (currentItem === '') {
+                imgEl.classList.add('hidden');
+                textEl.classList.remove('hidden');
+                textEl.innerHTML = seqTitles[seqIndex];
+            } else {
+                textEl.classList.add('hidden');
+                imgEl.classList.remove('hidden');
+                imgEl.src = currentItem;
+                imgEl.onerror = function() {
+                    this.onerror = null;
+                    this.src = 'https://via.placeholder.com/1000x700/f1f5f9/64748b.png?text=' + encodeURIComponent('Missing Image: ' + currentItem);
+                };
+            }
+
+            document.getElementById('lb-prev').style.visibility = seqIndex > 0 ? 'visible' : 'hidden';
+            document.getElementById('lb-next').style.visibility = seqIndex < seqImages.length - 1 ? 'visible' : 'hidden';
+            document.getElementById('lb-counter').innerText = `${seqIndex + 1} / ${seqImages.length}`;
+        }
+
+        function lbNext() { if (seqIndex < seqImages.length - 1) { seqIndex++; renderLightboxContent(); } }
+        function lbPrev() { if (seqIndex > 0) { seqIndex--; renderLightboxContent(); } }
+        function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
+
+        function zoomImage(factor) {
+            const imgEl = document.getElementById('lightbox-img');
+            if (!imgEl.classList.contains('hidden')) {
+                currentZoom = Math.max(0.5, Math.min(currentZoom + factor, 3));
+                imgEl.style.transform = `scale(${currentZoom})`;
+            }
+        }
+        function resetZoom() { currentZoom = 1; document.getElementById('lightbox-img').style.transform = `scale(1)`; }
+
+        updateSlide();
+    </script>
+</body>
+</html>
